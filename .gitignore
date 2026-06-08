@@ -1,0 +1,16 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+.vscode/
+.idea/
+
+# Logs / archives / deps (in case tooling is added later)
+*.log
+*.zip
+node_modules/
+
+# Local build scratch (the published outputs live at the repo root)
+/_build_report.json
