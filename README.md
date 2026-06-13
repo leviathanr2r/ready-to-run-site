@@ -22,7 +22,7 @@ assets. Everything is plain HTML/CSS/JS and deploys directly to GitHub Pages.
 │   └── styles.css          # all site styles
 ├── js/
 │   └── app.js              # application logic + roster/avatar data (loaded with defer)
-├── images/                 # 60 binary image assets (avatars, figures, art)
+├── images/                 # 99 binary image assets (avatars, figures, art)
 │   ├── og-image.png        # 1200×630 social-share card
 │   ├── favicon-32.png
 │   └── apple-touch-icon.png
@@ -139,11 +139,11 @@ python3 -m http.server 8000
 
 ## Build notes
 
-- **Assets are externalized for performance.** The original draft was a single ~4.9 MB
+- **Assets are externalized for performance.** The original draft was a single ~9.0 MB
   HTML file with every image inlined as base64. Here, styles, script, and images are
   separate files the browser can cache independently and load in parallel. The HTML
-  document itself is now ~30 KB, so first paint is near-instant. Identical images were
-  deduplicated (102 inline images → 60 unique files). See `CHANGELOG.md` for details.
+  document itself is now ~34 KB, so first paint is near-instant. Identical images were
+  deduplicated (143 inline images → 99 unique files). See `CHANGELOG.md` for details.
 - **Fonts** (Sora, Inter, Geist Mono) load from Google Fonts via the `<link>` tags in
   `index.html`. If you'd prefer to self-host them (slightly faster, avoids a third-party
   request), download the font files into `css/fonts/` and add `@font-face` rules.
