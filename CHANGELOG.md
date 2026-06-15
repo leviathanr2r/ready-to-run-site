@@ -4,6 +4,51 @@ All notable changes to the Ready-to-Run public site are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.3.0] - 2026-06-15
+
+Packaged the Splash-Tours consolidated build (the draft that adds the onboarding tours).
+This is the largest draft so far and is structured differently from 1.0 through 1.2, so the
+packaging approach changed accordingly. Verified in a headless browser, including the
+previously-dead "What We Stand For" links, which now resolve.
+
+### Changed
+
+- Rebuilt from the consolidated single-file draft (~13.7 MB), of which roughly 96% was
+  images inlined as base64.
+- Extracted 168 base64 data-URIs into 102 deduplicated binary image files under `images/`
+  (~6.0 MB total), including the tour imagery. Identical payloads were collapsed to a single
+  file; recognizable assets keep human-readable names, the rest use content-hash names.
+- Externalized the base-app stylesheet into `css/styles.css` (~151 KB).
+- Reduced `index.html` to a ~370 KB document for fast first paint.
+- Regenerated the favicon set and the 1200x630 Open Graph share card.
+- Updated `sitemap.xml` (`lastmod` 2026-06-15) and the structure notes in `README.md`.
+
+### Kept inline (deliberate)
+
+- The application script stays inline in `index.html`. This build's three onboarding splash
+  tours (Marketplace, Command Center, Deployment View) are a single-file design: route-keyed
+  `<template>` elements cloned at runtime by a controller wired into the hash router, with
+  tour CSS hoisted on mount. Splitting the script into an external file would risk that
+  verified behavior, and the script is only a small share of page weight once images are
+  external. So unlike 1.0 through 1.2, there is no separate `js/` folder.
+
+### Verified
+
+- Headless-browser smoke test (Chromium): the home view renders on load; navigating to
+  `#what-we-stand-for` activates the What We Stand For view; a gated route (`#marketplace`)
+  correctly redirects to sign-in while locked and shows after unlock; all three tour
+  templates are present; zero broken images; and no JavaScript errors. (The only console
+  message in the offline build sandbox is the Google Fonts request, which loads normally on
+  the live domain.)
+
+### Notes
+
+- The page `<title>` again drops the internal "(QA)" suffix
+  (`Ready-to-Run · AI Campaign Staff`).
+- A small URL-encoded inline SVG remains in `css/styles.css` by design (not base64).
+- The on-page `<meta name="description">` is still the original draft copy; the Open Graph
+  and Twitter descriptions use the product UX copy.
+
 ## [1.2.0] - 2026-06-13
 
 Repackaged the updated application draft (13 Jun) into the deployable static site.
