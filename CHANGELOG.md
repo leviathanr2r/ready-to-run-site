@@ -4,6 +4,57 @@ All notable changes to the Ready-to-Run public site are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.4.0] - 2026-06-29
+
+Packaged the Coalition Map cumulative build (Run 5), which adds the Coalition Map
+intelligence feature to the Command Center. Same tours architecture as 1.3, so the
+packaging approach is unchanged. Verified in a headless browser, including the new
+feature and the What We Stand For page.
+
+### Changed
+
+- Rebuilt from the Run 5 consolidated draft (~13.7 MB, ~96% images), md5
+  `c46681981272fd8825090d419688975f`.
+- Extracted 168 base64 data-URIs into 102 deduplicated binary image files under
+  `images/` (~6.0 MB total). The Coalition Map renders with CSS and SVG, so it added
+  no new raster images; the avatar set is unchanged from the prior build.
+- Externalized the base-app stylesheet into `css/styles.css` (~154 KB).
+- Reduced `index.html` to a ~390 KB document.
+- Carried forward the favicon set and the 1200x630 Open Graph card unchanged.
+- Updated `sitemap.xml` (`lastmod` 2026-06-29).
+
+### Kept inline (deliberate)
+
+- The application script stays inline in `index.html`. This build keeps the single-file
+  tour system (route-keyed `<template>` clones wired into the hash router) and now the
+  Coalition Map logic as well, so there is no separate `js/` folder (same rationale as
+  1.3).
+
+### Verified
+
+- Headless-browser smoke test (Chromium): the home view renders on load; navigating to
+  `#what-we-stand-for` activates the What We Stand For view; a gated route
+  (`#marketplace`) redirects to sign-in while locked; after unlock, the Command Center
+  shows the Coalition Map with all four read-out panels present (Recommended Priorities,
+  Potential Blockers, Coalition Support, High-Influence Players) and the "Center of Mass"
+  marker correctly removed; all three tour templates are present; zero broken images; and
+  no JavaScript errors. (The only console message in the offline build sandbox is the
+  Google Fonts request, which loads normally on the live domain.)
+
+### Notes
+
+- The page `<title>` again drops the internal "(QA)" suffix
+  (`Ready-to-Run · AI Campaign Staff`).
+- A small URL-encoded inline SVG remains in `css/styles.css` by design (not base64).
+- The on-page `<meta name="description">` is still the original draft copy; the Open Graph
+  and Twitter descriptions use the product UX copy.
+
+# Changelog
+
+All notable changes to the Ready-to-Run public site are documented here.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+
 ## [1.3.0] - 2026-06-15
 
 Packaged the Splash-Tours consolidated build (the draft that adds the onboarding tours).

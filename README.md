@@ -143,7 +143,7 @@ python3 -m http.server 8000
   was a single ~13.7 MB HTML file, ~96% of which was images inlined as base64. Those are
   now 102 deduplicated binary files under `images/` (browser-cacheable, loaded in
   parallel), and the base stylesheet lives in `css/styles.css`. The HTML document itself
-  is now ~370 KB, so first paint is fast.
+  is now ~390 KB, so first paint is fast.
 - **The application script is intentionally inline.** This build includes the onboarding
   splash tours, which are a single-file design: route-keyed `<template>` elements cloned
   at runtime by a controller wired into the hash router. Splitting the script into an

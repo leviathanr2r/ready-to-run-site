@@ -831,7 +831,11 @@ function dirGroup(){
   }).join('')}</div>`;
 }
 
-const INFO={
+const INFO={ smf:{k:"Coalition Map",t:"Who shapes the race, and where it's heading",d:"A map of every player who shapes this race, placed by where they stand on supporting your candidate, from with the opponent on the left to fully with you on the right. A player sits higher when they carry more influence and shows larger when they care more intensely. A ringed player can stall the outcome regardless of weight; a faded player is an estimate rather than a confirmed position.",p:["Every player placed by support, influence, and intensity","Left to right runs from the opponent to fully with you","Ringed players can stall · faded ones are estimates"]},
+ smr:{k:"Recommended Priorities",t:"Where your effort moves the needle most",d:"The players where your effort moves the needle most. Each bar shows how far overall support would shift if that player moved ten points toward you. The list is ordered by payoff, so the top is where to spend time first. Tap a bar to see the projected move.",p:["Ranked by how far each player shifts the field","The top of the list is where to spend time first","Tap a bar to see the projected move"]},
+ smb:{k:"Potential Blockers",t:"Who can hold your coalition back",d:"The players who can hold your coalition back, ordered by the friction they create. A structural gate can stall things even from near the center, because it holds an approval the rest wait on. The others are high-intensity holdouts and organized blocs sitting against you. Tap one for detail.",p:["Ranked by the friction each one creates","A structural gate can stall even from the center","Tap one for the detail"]},
+ smc:{k:"Coalition Support",t:"How each group's weight splits",d:"How each group's weight splits between pushing for your support and holding back, measured around where support sits today. The longer side wins that group. The dot shows whether a group is unified behind one position or split, since a split group is harder to count on.",p:["For your support against holding back, side by side","The longer side wins that group","The dot flags unified · mixed · split"]},
+ smh:{k:"High-Influence Players",t:"The heavyweights at the decision point",d:"The heavyweight players sitting right at the decision point. These hold the center of the race, and losing one would move the outcome against you, so they are the relationships to protect. Tap a player for detail.",p:["These hold the center of the race","Losing one would move the outcome against you","The relationships to protect first"]},
  tl:{k:"Campaign Timeline",t:"Always know where you are",
   d:"Based on your campaign cycle, your agents work tirelessly to build toward the next phase, with feedback tuned to what your campaign should be doing at this stage.",
   p:["Eight phases at a glance","Updates the instant your dates change","Your agents work to match the phase"]},
@@ -894,6 +898,7 @@ function renderDash(){
     panel('nt','Notifications', `<span id="ntMeta">${UPDATES.filter(u=>!u.read).length}</span> new`, `<button class="filt-btn" id="ntFilter">${FILT} Filter</button>`+scrollWrap(`<div class="stack">${UPDATES.map((u,i)=>uiItem(u,i)).join('')}<div class="nt-empty" hidden>${BELL}<span>You have no notifications</span></div></div>`,'nt'),'new') +
     panel('dp','Deployed Agents', dpMeta(), dpBody(),'live') +
     panel('od','Agents on Deck', odMeta(), odBody(),'live') +
+    `<section class="panel g-smf" data-info="smf"><div class="phead"><div class="ph-left"><span class="pt">Coalition Map</span></div></div><div class="pbody"><svg id="sm-spectrum" class="sm-svg" viewBox="0 0 1000 360" role="img" aria-label="Coalition Map"></svg><div class="sm-foot"><div class="sm-legend" id="sm-legend"></div></div></div></section><section class="panel g-smr" data-info="smr"><div class="phead"><div class="ph-left"><span class="pt">Recommended Priorities</span></div></div><div class="pbody"><svg id="sm-leverage" class="sm-svg" viewBox="0 0 560 326" role="img" aria-label="Recommended Priorities"></svg><div class="sm-foot">Tap a bar to test a move · <span id="sm-cf">support sits at <b>58</b> today</span></div></div></section><section class="panel g-smb" data-info="smb"><div class="phead"><div class="ph-left"><span class="pt">Potential Blockers</span></div></div><div class="pbody"><svg id="sm-blockers" class="sm-svg" viewBox="0 0 560 326" role="img" aria-label="Potential Blockers"></svg><div class="sm-foot"><span id="sm-blk">Tap a player for detail</span></div></div></section><section class="panel g-smc" data-info="smc"><div class="phead"><div class="ph-left"><span class="pt">Coalition Support</span></div></div><div class="pbody"><svg id="sm-coalitions" class="sm-svg" viewBox="0 0 580 326" role="img" aria-label="Coalition Support"></svg><div class="sm-foot">Dot shows whether a group is unified · mixed · split</div></div></section><section class="panel g-smh" data-info="smh"><div class="phead"><div class="ph-left"><span class="pt">High-Influence Players</span></div></div><div class="pbody"><svg id="sm-kingmakers" class="sm-svg" viewBox="0 0 560 326" role="img" aria-label="High-Influence Players"></svg><div class="sm-foot"><span id="sm-ki">Tap a player for detail</span></div></div></section>` +
     panel('mk','Agent Marketplace',`<span id="mkMeta">Recommended for <b>${PHASES[now]}</b> phase</span>`, `<div class="mc-wrap"><div class="mc-row" id="mcGrid">${mkList(now).map(mcCard).join('')}</div><button class="mc-cue mc-cue-l" id="mcCueL" title="Scroll left" hidden>${CHEVL}</button><button class="mc-cue mc-cue-r" id="mcCue" title="Scroll for more agents">${CHEVR}</button></div>`,'rec');
   attach();
 }
@@ -2048,6 +2053,220 @@ buildTabs(); render(); initCart();
 
 rtRoute();
 document.querySelectorAll('.nav-set a, .brand').forEach(function(a){a.addEventListener('click',function(){var cb=document.getElementById('navtog'); if(cb) cb.checked=false;});});
+</script>
+<script>
+/* Coalition Map · Command Center feature · client-safe render (mockup design) */
+(function(){
+  "use strict";
+  var GI={"Party Organization":0.88,"Organized Labor":0.85,"Advocacy & Issue Groups":0.66,"Business Community":0.72,"Local Electeds":0.78,"Donor Network":0.80,"Community & Faith":0.60};
+  var COL={"Party Organization":"hsl(215 88% 62%)","Organized Labor":"hsl(175 68% 50%)","Advocacy & Issue Groups":"hsl(265 78% 70%)","Business Community":"hsl(38 90% 58%)","Local Electeds":"hsl(150 60% 54%)","Donor Network":"hsl(352 80% 68%)","Community & Faith":"hsl(220 24% 70%)"};
+  var DATA=[
+    {role:"County Party Chair",grp:"Party Organization",pos:48,si:0.85,sal:88,veto:true,src:"sourced"},
+    {role:"State Party Leadership",grp:"Party Organization",pos:58,si:0.80,sal:70,veto:false,src:"sourced"},
+    {role:"Labor Federation",grp:"Organized Labor",pos:72,si:0.88,sal:90,veto:false,src:"sourced"},
+    {role:"Teachers Union",grp:"Organized Labor",pos:66,si:0.82,sal:86,veto:false,src:"sourced"},
+    {role:"Service Workers Local",grp:"Organized Labor",pos:60,si:0.60,sal:72,veto:false,src:"sourced"},
+    {role:"Building Trades Council",grp:"Organized Labor",pos:44,si:0.62,sal:75,veto:false,src:"inferred"},
+    {role:"Progressive Advocacy Coalition",grp:"Advocacy & Issue Groups",pos:82,si:0.62,sal:92,veto:false,src:"sourced"},
+    {role:"Environmental Group",grp:"Advocacy & Issue Groups",pos:78,si:0.50,sal:80,veto:false,src:"sourced"},
+    {role:"Single-Issue PAC",grp:"Advocacy & Issue Groups",pos:26,si:0.58,sal:95,veto:false,src:"sourced"},
+    {role:"Chamber of Commerce",grp:"Business Community",pos:36,si:0.70,sal:74,veto:false,src:"sourced"},
+    {role:"Real Estate Association",grp:"Business Community",pos:30,si:0.58,sal:64,veto:false,src:"inferred"},
+    {role:"Mayor, Largest City",grp:"Local Electeds",pos:69,si:0.78,sal:82,veto:false,src:"sourced"},
+    {role:"County Commissioners",grp:"Local Electeds",pos:46,si:0.55,sal:60,veto:false,src:"sourced"},
+    {role:"Major Donor Network",grp:"Donor Network",pos:62,si:0.75,sal:70,veto:false,src:"inferred"},
+    {role:"Faith Coalition",grp:"Community & Faith",pos:50,si:0.45,sal:55,veto:false,src:"sourced"}
+  ];
+  var ZONES=["With opponent","Leaning opponent","Uncommitted","Leaning to us","Committed"];
+  function wgt(d){var e=d.si*GI[d.grp]*(d.sal/100);if(d.veto)e*=0.15;return e;}
+  var sumW=DATA.reduce(function(a,d){return a+wgt(d);},0);
+  var CENTER=DATA.reduce(function(a,d){return a+d.pos*wgt(d);},0)/sumW;
+  var BAND=6;
+  var NS="http://www.w3.org/2000/svg";
+  function el(t,a,x){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(x!=null)e.textContent=x;return e;}
+  function short(s){return s.length>21?s.slice(0,18)+"...":s;}
+  function clear(svg){while(svg.firstChild)svg.removeChild(svg.firstChild);}
+  var SM={DATA:DATA,GI:GI,COL:COL,ZONES:ZONES,wgt:wgt,sumW:sumW,CENTER:CENTER,BAND:BAND,NS:NS,el:el,short:short,clear:clear};
+  window.__sm=SM;
+
+  /* shared hover tooltip (created once) */
+  var ttEl=document.getElementById("sm-tt");
+  if(!ttEl){ttEl=document.createElement("div");ttEl.id="sm-tt";ttEl.className="sm-tt";document.body.appendChild(ttEl);}
+  function moveTT(ev){
+    var pad=14,w=ttEl.offsetWidth||230,h=ttEl.offsetHeight||130;
+    var lx=ev.clientX+pad,ty=ev.clientY+pad;
+    if(lx+w>window.innerWidth-8)lx=ev.clientX-w-pad;
+    if(ty+h>window.innerHeight-8)ty=ev.clientY-h-pad;
+    if(ty<8)ty=8;
+    ttEl.style.left=lx+"px";ttEl.style.top=ty+"px";
+  }
+  function hideTT(){ttEl.classList.remove("show");}
+  function showTT(d,ev){
+    var z=ZONES[Math.min(4,Math.floor(d.pos/20))];
+    var flag=d.veto?'<span style="color:hsl(352 80% 70%)">can stall the outcome</span> · ':'';
+    var src=d.src==="inferred"?'<span style="color:hsl(38 92% 62%)">estimated</span>':'<span style="color:hsl(150 64% 58%)">sourced</span>';
+    ttEl.innerHTML='<div class="sm-tt-name">'+d.role+'</div><div class="sm-tt-grp" style="color:'+COL[d.grp]+'">'+d.grp+'</div><div class="sm-tt-hr"></div>'+
+      '<div class="sm-tt-row"><span class="sm-tt-k">Support</span><span class="sm-tt-v">'+d.pos+' · '+z+'</span></div>'+
+      '<div class="sm-tt-row"><span class="sm-tt-k">Influence</span><span class="sm-tt-v">'+d.si.toFixed(2)+'</span></div>'+
+      '<div class="sm-tt-row"><span class="sm-tt-k">Intensity</span><span class="sm-tt-v">'+d.sal+'</span></div>'+
+      '<div class="sm-tt-flag">'+flag+src+'</div>';
+    ttEl.classList.add("show");moveTT(ev);
+  }
+  document.addEventListener("click",hideTT);
+
+  /* full-width spectrum */
+  function drawSpectrum(svg){
+    var L=58,R=24,T=50,B=326,W=1000,FLOOR=0.4;
+    function x(p){return L+(p/100)*((W-R)-L);}
+    function y(v){return B-((v-FLOOR)/(1-FLOOR))*(B-T);}
+    var zf=["hsl(352 80% 64% / 0.07)","hsl(38 92% 58% / 0.06)","hsl(220 14% 60% / 0.06)","hsl(150 64% 52% / 0.07)","hsl(215 88% 56% / 0.08)"];
+    for(var i=0;i<5;i++){
+      svg.appendChild(el("rect",{x:x(i*20),y:T,width:x((i+1)*20)-x(i*20),height:B-T,fill:zf[i]}));
+      svg.appendChild(el("text",{x:(x(i*20)+x((i+1)*20))/2,y:T-9,"text-anchor":"middle","class":"sm-znl"},ZONES[i]));
+    }
+    var gl=[20,40,60,80];
+    for(var j=0;j<gl.length;j++) svg.appendChild(el("line",{x1:x(gl[j]),y1:T,x2:x(gl[j]),y2:B,stroke:"hsl(220 30% 100% / 0.08)","stroke-dasharray":"2 4"}));
+    svg.appendChild(el("line",{x1:L,y1:B,x2:W-R,y2:B,stroke:"hsl(220 30% 100% / 0.12)"}));
+    var xt=[0,20,40,60,80,100];
+    for(var k=0;k<xt.length;k++) svg.appendChild(el("text",{x:x(xt[k]),y:B+17,"text-anchor":"middle","class":"sm-ax"},xt[k]));
+    var yt=[0.4,0.6,0.8,1.0];
+    for(var n=0;n<yt.length;n++){
+      svg.appendChild(el("text",{x:L-9,y:y(yt[n])+3,"text-anchor":"end","class":"sm-ax"},yt[n].toFixed(2)));
+      svg.appendChild(el("line",{x1:L,y1:y(yt[n]),x2:W-R,y2:y(yt[n]),stroke:"hsl(220 30% 100% / 0.05)"}));
+    }
+    svg.appendChild(el("text",{x:16,y:(T+B)/2,"text-anchor":"middle","class":"sm-axt",transform:"rotate(-90 16 "+((T+B)/2)+")"},"INFLUENCE"));
+    DATA.forEach(function(d){
+      var cx=x(d.pos),cy=y(d.si),r=4+(d.sal/100)*9;
+      if(d.veto)svg.appendChild(el("circle",{cx:cx,cy:cy,r:r+5,fill:"none",stroke:"hsl(352 80% 64%)","stroke-width":1.6,"stroke-dasharray":"2 3"}));
+      var c=el("circle",{cx:cx,cy:cy,r:r,fill:COL[d.grp],opacity:d.src==="inferred"?0.45:0.92,stroke:"var(--navy-deep)","stroke-width":2,"class":"sm-node"});
+      c.addEventListener("mouseenter",function(ev){showTT(d,ev);});
+      c.addEventListener("mousemove",moveTT);
+      c.addEventListener("mouseleave",hideTT);
+      c.addEventListener("click",function(ev){ev.stopPropagation();showTT(d,ev);});
+      svg.appendChild(c);
+    });
+  }
+
+  /* group legend */
+  function drawLegend(){
+    var lg=document.getElementById("sm-legend");
+    if(!lg)return;
+    lg.innerHTML="";
+    Object.keys(COL).forEach(function(g){
+      var d=document.createElement("div");d.className="sm-lg";
+      d.innerHTML='<span class="sm-sw" style="background:'+COL[g]+'"></span>'+g;lg.appendChild(d);
+    });
+    var v=document.createElement("div");v.className="sm-lg";
+    v.innerHTML='<span class="sm-sw" style="background:transparent;border:1.5px dashed hsl(352 80% 64%);border-radius:50%"></span>can stall the outcome';
+    lg.appendChild(v);
+    var e2=document.createElement("div");e2.className="sm-lg";
+    e2.innerHTML='<span class="sm-sw" style="background:hsl(220 24% 70% / 0.45);border-radius:50%"></span>estimated';
+    lg.appendChild(e2);
+  }
+
+  /* Recommended Priorities */
+  function drawPriorities(svg){
+    if(!svg)return;
+    var rows=DATA.map(function(d){var o={};for(var k in d)o[k]=d[k];o.shift=10*wgt(d)/sumW;return o;}).sort(function(a,b){return b.shift-a.shift;}).slice(0,8);
+    var maxS=rows[0].shift,Lx=178,Rx=512,top=22,rowH=36;
+    rows.forEach(function(d,i){
+      var cy=top+i*rowH+10;
+      svg.appendChild(el("text",{x:Lx-12,y:cy+4,"text-anchor":"end","class":"sm-barlbl"},short(d.role)));
+      svg.appendChild(el("rect",{x:Lx,y:cy-9,width:Rx-Lx,height:18,fill:"hsl(220 30% 100% / 0.05)",rx:4}));
+      var w=Math.max(2,(d.shift/maxS)*(Rx-Lx));
+      var bar=el("rect",{x:Lx,y:cy-9,width:w,height:18,fill:COL[d.grp],rx:4,opacity:0.9,"class":"sm-bar"});
+      bar.appendChild(el("title",{},d.role+" · support moves +"+d.shift.toFixed(2)+" if moved 10 toward us"));
+      bar.addEventListener("click",function(ev){ev.stopPropagation();var t=document.getElementById("sm-cf");if(t)t.innerHTML=d.role+" +10 · support <b>"+Math.round(CENTER)+" to "+(CENTER+d.shift).toFixed(1)+"</b>";});
+      svg.appendChild(bar);
+      svg.appendChild(el("text",{x:Lx+w+8,y:cy+4,"class":"sm-barval"},"+"+d.shift.toFixed(2)));
+    });
+  }
+
+  /* Potential Blockers */
+  function drawBlockers(svg){
+    if(!svg)return;
+    var below=DATA.filter(function(d){return d.pos<CENTER;}).map(function(d){
+      var o={};for(var k in d)o[k]=d[k];
+      o.fric=d.si*(d.sal/100)*(CENTER-d.pos);
+      o.kind=d.veto?"Structural gate":(d.sal>=88?"High-intensity holdout":(d.grp==="Business Community"?"Business bloc":(d.grp==="Organized Labor"?"Split bloc":"Bloc resistance")));
+      return o;
+    }).sort(function(a,b){return (b.veto-a.veto)||(b.fric-a.fric);}).slice(0,5);
+    var maxF=Math.max.apply(null,below.map(function(d){return d.fric;})),Lx=200,Rx=512,top=20,rowH=52;
+    below.forEach(function(d,i){
+      var cy=top+i*rowH+14;
+      svg.appendChild(el("text",{x:Lx-12,y:cy-1,"text-anchor":"end","class":"sm-barlbl"},short(d.role)));
+      svg.appendChild(el("text",{x:Lx-12,y:cy+12,"text-anchor":"end","class":"sm-tagsm",fill:d.veto?"hsl(352 80% 64%)":"var(--ink-4)"},d.kind.toUpperCase()+" · AT "+d.pos));
+      svg.appendChild(el("rect",{x:Lx,y:cy-8,width:Rx-Lx,height:16,fill:"hsl(220 30% 100% / 0.05)",rx:4}));
+      var w=Math.max(2,(d.fric/maxF)*(Rx-Lx));
+      var col=d.veto?"hsl(352 80% 64%)":"hsl(38 92% 58%)";
+      var b=el("rect",{x:Lx,y:cy-8,width:w,height:16,fill:col,rx:4,opacity:0.85,"class":"sm-bar"});
+      b.appendChild(el("title",{},d.role+" · "+d.kind+" · currently at "+d.pos));
+      b.addEventListener("click",function(ev){ev.stopPropagation();var t=document.getElementById("sm-blk");if(t)t.innerHTML=d.role+": "+d.kind.toLowerCase()+", currently at "+d.pos;});
+      svg.appendChild(b);
+      if(d.veto)svg.appendChild(el("text",{x:Lx+w+8,y:cy+4,"class":"sm-barval",fill:"hsl(352 80% 70%)"},"holds approval rights"));
+    });
+  }
+
+  /* Coalition Support */
+  function drawCoalitions(svg){
+    if(!svg)return;
+    var g={};
+    DATA.forEach(function(d){var o=g[d.grp]||(g[d.grp]={a:0,b:0,pos:[]});if(d.pos>=CENTER)o.a+=wgt(d);else o.b+=wgt(d);o.pos.push(d.pos);});
+    function sd(arr){var m=arr.reduce(function(x,y){return x+y;},0)/arr.length;return Math.sqrt(arr.reduce(function(x,y){return x+(y-m)*(y-m);},0)/arr.length);}
+    var order=["Organized Labor","Advocacy & Issue Groups","Local Electeds","Party Organization","Donor Network","Community & Faith","Business Community"];
+    var vals=[];Object.keys(g).forEach(function(k){vals.push(g[k].a);vals.push(g[k].b);});
+    var maxS=Math.max.apply(null,vals);
+    var cx=300,reach=196,labelR=150,top=44,rowH=37;
+    svg.appendChild(el("text",{x:cx-8,y:26,"text-anchor":"end","font-family":"'Geist Mono',monospace",fill:"hsl(38 92% 62%)","font-size":9.5,"letter-spacing":"0.08em"},"HOLDING BACK"));
+    svg.appendChild(el("text",{x:cx+8,y:26,"text-anchor":"start","font-family":"'Geist Mono',monospace",fill:"hsl(150 64% 58%)","font-size":9.5,"letter-spacing":"0.08em"},"FOR SUPPORT"));
+    svg.appendChild(el("line",{x1:cx,y1:36,x2:cx,y2:top+order.length*rowH-12,stroke:"hsl(220 30% 100% / 0.16)"}));
+    order.forEach(function(grp,i){
+      var cy=top+i*rowH,o=g[grp];if(!o)return;
+      var s=o.pos.length>1?sd(o.pos):0;
+      var align=s<8?"hsl(150 64% 52%)":(s<18?"hsl(38 92% 58%)":"hsl(352 80% 64%)");
+      svg.appendChild(el("circle",{cx:labelR-136,cy:cy-3,r:4,fill:align}));
+      svg.appendChild(el("text",{x:labelR-2,y:cy+1,"text-anchor":"end","class":"sm-barlbl","font-size":10.5},grp));
+      if(o.b>0){var wb=(o.b/maxS)*reach;svg.appendChild(el("rect",{x:cx-wb,y:cy-9,width:wb,height:18,fill:"hsl(38 92% 58%)",rx:3,opacity:0.82}));}
+      if(o.a>0){var wa=(o.a/maxS)*reach;svg.appendChild(el("rect",{x:cx,y:cy-9,width:wa,height:18,fill:"hsl(150 64% 52%)",rx:3,opacity:0.82}));}
+    });
+  }
+
+  /* High-Influence Players */
+  function drawKingmakers(svg){
+    if(!svg)return;
+    var rows=DATA.map(function(d){var o={};for(var k in d)o[k]=d[k];o.score=wgt(d)*Math.exp(-Math.abs(d.pos-CENTER)/30);return o;}).sort(function(a,b){return b.score-a.score;}).slice(0,6);
+    var maxV=rows[0].score,Lx=192,Rx=512,top=24,rowH=44;
+    rows.forEach(function(d,i){
+      var cy=top+i*rowH+8;
+      svg.appendChild(el("text",{x:Lx-12,y:cy-1,"text-anchor":"end","class":"sm-barlbl"},short(d.role)));
+      svg.appendChild(el("text",{x:Lx-12,y:cy+12,"text-anchor":"end","class":"sm-tagsm"},"AT "+d.pos+" · INFLUENCE "+d.si.toFixed(2)));
+      svg.appendChild(el("rect",{x:Lx,y:cy-8,width:Rx-Lx,height:16,fill:"hsl(220 30% 100% / 0.05)",rx:4}));
+      var w=Math.max(2,(d.score/maxV)*(Rx-Lx));
+      var b=el("rect",{x:Lx,y:cy-8,width:w,height:16,fill:COL[d.grp],rx:4,opacity:0.9,"class":"sm-bar"});
+      b.appendChild(el("title",{},d.role+" · holds the center: high influence at the decision point"));
+      b.addEventListener("click",function(ev){ev.stopPropagation();var t=document.getElementById("sm-ki");if(t)t.innerHTML=d.role+": holds the center · influence "+d.si.toFixed(2)+" · at "+d.pos;});
+      svg.appendChild(b);
+    });
+  }
+
+  function render(){
+    var spec=document.getElementById("sm-spectrum");
+    if(!spec)return;
+    clear(spec);
+    drawSpectrum(spec);
+    drawLegend();
+    var ids=["sm-leverage","sm-blockers","sm-coalitions","sm-kingmakers"];
+    for(var i=0;i<ids.length;i++){var s=document.getElementById(ids[i]);if(s)clear(s);}
+    drawPriorities(document.getElementById("sm-leverage"));
+    drawBlockers(document.getElementById("sm-blockers"));
+    drawCoalitions(document.getElementById("sm-coalitions"));
+    drawKingmakers(document.getElementById("sm-kingmakers"));
+  }
+  window.__smRender=render;
+  var dash=document.getElementById("dash");
+  if(dash){new MutationObserver(function(){render();}).observe(dash,{childList:true});}
+  render();
+})();
 </script>
 
 <style id="rtr-tour-host-css">#rtr-tour-host{position:fixed;inset:0;z-index:150;pointer-events:none}#rtr-tour-host>*{pointer-events:auto}.jl-replay,#jl-replay{display:none!important}</style>

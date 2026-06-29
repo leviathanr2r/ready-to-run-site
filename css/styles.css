@@ -63,7 +63,36 @@ header.top{position:sticky;top:0;z-index:40;background:hsl(220 64% 8% / 0.85);ba
     "tl tl tl tl mg mg"
     "pn pn pn pn mg mg"
     "nt nt dp dp od od"
+    "smf smf smf smf smf smf"
+    "smr smr smr smb smb smb"
+    "smc smc smc smh smh smh"
     "mk mk mk mk mk mk";}
+/* ===== Coalition Map feature ===== */
+.g-smf{grid-area:smf} .g-smr{grid-area:smr} .g-smb{grid-area:smb} .g-smc{grid-area:smc} .g-smh{grid-area:smh}
+svg.sm-svg{display:block;width:100%;height:auto}
+.sm-foot{margin-top:0.7rem;padding-top:0.7rem;border-top:1px solid var(--line);font-family:'Geist Mono',monospace;font-size:0.68rem;color:hsl(220 12% 62%);letter-spacing:0.02em}
+.sm-foot b{color:var(--electric-2);font-weight:500}
+.sm-legend{display:flex;flex-wrap:wrap;gap:6px 15px}
+.sm-lg{display:flex;align-items:center;gap:7px;font-size:0.72rem;color:hsl(220 14% 80%);font-family:'Inter',sans-serif}
+.sm-sw{width:11px;height:11px;border-radius:3px;flex:none}
+.sm-ax{font-family:'Geist Mono',monospace;fill:hsl(220 10% 58%);font-size:10px}
+.sm-axt{font-family:'Geist Mono',monospace;fill:hsl(220 12% 64%);font-size:10px;letter-spacing:0.08em}
+.sm-znl{font-family:'Geist Mono',monospace;fill:hsl(220 12% 66%);font-size:9.5px;letter-spacing:0.04em}
+.sm-barlbl{font-family:'Inter',sans-serif;fill:hsl(220 22% 92%);font-size:11px}
+.sm-barval{font-family:'Geist Mono',monospace;fill:hsl(220 22% 92%);font-size:10.5px;font-weight:500}
+.sm-tagsm{font-family:'Geist Mono',monospace;fill:hsl(220 10% 58%);font-size:8.5px;letter-spacing:0.06em}
+.sm-dotlbl{font-family:'Inter',sans-serif;fill:hsl(220 22% 92%);font-size:10px;font-weight:500}
+.sm-node,.sm-bar{cursor:pointer;transition:opacity .15s}
+circle.sm-node:hover,rect.sm-bar:hover{opacity:0.82}
+.sm-tt{position:fixed;pointer-events:none;z-index:200;display:none;max-width:230px;background:hsl(220 56% 11% / 0.98);border:1px solid var(--line-2);border-radius:10px;padding:9px 11px;box-shadow:0 10px 30px hsl(220 64% 4% / 0.6);font-family:'Inter',sans-serif;font-size:0.78rem;color:hsl(220 22% 95%);line-height:1.5}
+.sm-tt.show{display:block}
+.sm-tt-name{font-family:'Sora',sans-serif;font-weight:600;font-size:0.86rem;letter-spacing:-0.01em}
+.sm-tt-grp{font-family:'Geist Mono',monospace;font-size:0.56rem;letter-spacing:0.08em;text-transform:uppercase;margin-top:1px}
+.sm-tt-hr{height:1px;background:var(--line);margin:6px 0}
+.sm-tt-row{display:flex;justify-content:space-between;gap:16px}
+.sm-tt-k{color:hsl(220 10% 58%)}
+.sm-tt-v{color:hsl(220 22% 92%);font-family:'Geist Mono',monospace;font-size:0.74rem}
+.sm-tt-flag{margin-top:5px;font-family:'Geist Mono',monospace;font-size:0.62rem;letter-spacing:0.04em}
 .g-tl{grid-area:tl}.g-mg{grid-area:mg}.g-pn{grid-area:pn}.g-od{grid-area:od}.g-dp{grid-area:dp}.g-nt{grid-area:nt}.g-mk{grid-area:mk}
 
 .panel{position:relative;display:flex;flex-direction:column;background:hsl(220 48% 10%);border:1px solid var(--line-2);border-radius:16px;padding:1.05rem 1.1rem;
@@ -416,7 +445,7 @@ header.top{position:sticky;top:0;z-index:40;background:hsl(220 64% 8% / 0.85);ba
 .st.hire{color:var(--electric-2)} .st.hire i{background:var(--electric-2);box-shadow:0 0 0 3px hsl(214 95% 62% / 0.22)}
 
 @media(max-width:980px){
-  .dash{grid-template-columns:minmax(0,1fr);grid-template-areas:"tl" "mg" "pn" "nt" "dp" "od" "mk";}
+  .dash{grid-template-columns:minmax(0,1fr);grid-template-areas:"tl" "mg" "pn" "nt" "dp" "od" "smf" "smr" "smb" "smc" "smh" "mk";}
   .panel,.pbody,.cc-card,.cc-top,.cc-meta,.stack,.dir-stack,.dir-agents,.director,.cc-grid,.ui-mid{min-width:0}
 }
 @media(max-width:560px){ .cc-grid{grid-template-columns:1fr} }
